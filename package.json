@@ -1,0 +1,43 @@
+{
+  "name": "eka-emr-adapter",
+  "version": "1.0.0",
+  "description": "Convert FHIR-based scribe output to EKA Care EMR input format",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "node examples/convert.js",
+    "convert": "node examples/convert.js"
+  },
+  "keywords": [
+    "eka-care",
+    "emr",
+    "fhir",
+    "healthcare",
+    "medscribe",
+    "scribe",
+    "adapter",
+    "medical",
+    "hl7",
+    "interoperability"
+  ],
+  "author": "EKA Care",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medScribeAlliance/eka-emr-adapter"
+  },
+  "bugs": {
+    "url": "https://github.com/medScribeAlliance/eka-emr-adapter/issues"
+  },
+  "homepage": "https://github.com/medScribeAlliance/eka-emr-adapter#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ]
+}
