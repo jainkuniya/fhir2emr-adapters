@@ -92,8 +92,8 @@ async function main() {
   
   try {
     // Define file paths
-    const inputPath = path.join(__dirname, '../scribe_output.json');
-    const outputPath = path.join(__dirname, '../eka-emr-output.json');
+    const inputPath = path.join(__dirname, '../../../scribe_output.json');
+    const outputPath = path.join(__dirname, '../../../eka-emr-output.json');
     
     // Check if input file exists
     if (!fs.existsSync(inputPath)) {
