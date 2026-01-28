@@ -299,99 +299,6 @@ Async wrapper for conversion.
 }
 ```
 
-## Integration Scenarios
-
-### Scenario 1: Real-time Webhook
-
-```javascript
-const express = require('express');
-const { convertFHIRToEkaEMR } = require('eka-emr-adapter');
-
-const app = express();
-app.use(express.json());
-
-app.post('/api/scribe/webhook', async (req, res) => {
-  try {
-    const fhirBundle = req.body;
-    const ekaInput = convertFHIRToEkaEMR(fhirBundle);
-    
-    // Send to EKA Care API
-    await fetch('https://api.eka.care/v1/emr/records', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.EKA_API_KEY}`
-      },
-      body: JSON.stringify(ekaInput)
-    });
-    
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.listen(3000);
-```
-
-### Scenario 2: Batch Processing
-
-```javascript
-const { convertFHIRToEkaEMR } = require('eka-emr-adapter');
-const AWS = require('aws-sdk');
-
-const sqs = new AWS.SQS();
-
-async function processQueue() {
-  const messages = await sqs.receiveMessage({
-    QueueUrl: process.env.SQS_QUEUE_URL,
-    MaxNumberOfMessages: 10
-  }).promise();
-  
-  for (const message of messages.Messages || []) {
-    const fhirBundle = JSON.parse(message.Body);
-    const ekaInput = convertFHIRToEkaEMR(fhirBundle);
-    await sendToEkaCare(ekaInput);
-    await sqs.deleteMessage({
-      QueueUrl: process.env.SQS_QUEUE_URL,
-      ReceiptHandle: message.ReceiptHandle
-    }).promise();
-  }
-}
-```
-
-### Scenario 3: Serverless (AWS Lambda)
-
-```javascript
-const { convertFHIRToEkaEMR } = require('eka-emr-adapter');
-const AWS = require('aws-sdk');
-
-const s3 = new AWS.S3();
-
-exports.handler = async (event) => {
-  for (const record of event.Records) {
-    const bucket = record.s3.bucket.name;
-    const key = record.s3.object.key;
-    
-    // Get FHIR Bundle from S3
-    const data = await s3.getObject({ Bucket: bucket, Key: key }).promise();
-    const fhirBundle = JSON.parse(data.Body.toString());
-    
-    // Convert
-    const ekaInput = convertFHIRToEkaEMR(fhirBundle);
-    
-    // Save output
-    await s3.putObject({
-      Bucket: process.env.OUTPUT_BUCKET,
-      Key: key.replace('.json', '-eka.json'),
-      Body: JSON.stringify(ekaInput)
-    }).promise();
-  }
-  
-  return { statusCode: 200 };
-};
-```
-
 ## Parser Modules
 
 Each parser follows a consistent pattern:
@@ -542,22 +449,6 @@ spec:
 
 ## Configuration
 
-### Environment Variables
-
-```bash
-# EKA Care API
-EKA_API_KEY=your_api_key_here
-EKA_API_URL=https://api.eka.care/v1
-
-# Scribe Configuration
-SCRIBE_WEBHOOK_SECRET=your_secret
-
-# AWS (if using)
-AWS_REGION=us-east-1
-SQS_QUEUE_URL=https://sqs...
-OUTPUT_BUCKET=eka-outputs
-```
-
 ## Testing
 
 ### Unit Testing
@@ -650,33 +541,6 @@ function convertWithErrorHandling(fhirBundle) {
 10. **Retry Logic**: Implement exponential backoff for API failures
 
 ## Troubleshooting
-
-### Common Issues
-
-**Issue**: Conversion takes too long  
-**Solution**: Process large bundles asynchronously, use worker threads
-
-**Issue**: Missing data in output  
-**Solution**: Check FHIR resource categories, review parser logic
-
-**Issue**: API authentication fails  
-**Solution**: Verify EKA_API_KEY is correct and not expired
-
-**Issue**: Memory issues with large bundles  
-**Solution**: Implement streaming parsing for very large bundles
-
-**Issue**: "Invalid FHIR Bundle" error  
-**Solution**: Verify `resourceType` is "Bundle" and structure is valid FHIR
-
-**Issue**: Incorrect mapping  
-**Solution**: Review parser logic in `src/parsers/`, add custom mapping
-
-## Performance
-
-- **Conversion Speed**: ~2ms for typical bundles (29 resources)
-- **Memory**: Efficient - processes bundles in-memory
-- **Throughput**: Can handle 100+ conversions/second
-- **Scalability**: Stateless design allows horizontal scaling
 
 ## Contributing
 
