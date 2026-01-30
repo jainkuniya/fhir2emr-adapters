@@ -4,13 +4,13 @@
 - Use adapter: to convert FHIR to Eka EMR format
 - pass the output of adapter to inside `tool`, sample below
 - Create a patient appointment, using https://developer.eka.care/api-reference/doc-tool/appointment-api/book-appointment-slot
+- Get `auth` header from https://console.eka.care/api-keys/ (Generate long lived token) 
 
 
 ```
 curl 'https://parchi.eka.care/app/push/px-draft/?flavour=dw' \
   -X POST \
   -H 'accept: application/json' \
-  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
   -H 'content-type: application/json' \
   -b 'auth: <auth_token>' \
   --data-raw '{
